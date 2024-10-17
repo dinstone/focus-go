@@ -2,16 +2,17 @@ package test
 
 import (
 	"errors"
-	"github.com/dinstone/focus-go"
-	"github.com/dinstone/focus-go/options"
-	"github.com/dinstone/focus-go/serializer"
 	"log"
 	"net"
 	"net/rpc"
 	"reflect"
 	"testing"
 
-	"github.com/dinstone/focus-go/compressor"
+	"github.com/dinstone/focus-go/focus"
+	"github.com/dinstone/focus-go/focus/options"
+	"github.com/dinstone/focus-go/focus/serializer"
+
+	"github.com/dinstone/focus-go/focus/compressor"
 	"github.com/dinstone/focus-go/test/json"
 	"github.com/dinstone/focus-go/test/protobuf"
 	"github.com/stretchr/testify/assert"

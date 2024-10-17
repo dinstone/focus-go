@@ -1,23 +1,30 @@
 # Focus-go
+
 **Focus** is the next generation cross language lightweight RPC framework. It can quickly and easily develop microservice applications, which greatly simplifies RPC programming.
 
 **Focus-go** is the go language implementation of the Focus.
 
 ## Install
+
 - install `protoc` at first : http://github.com/google/protobuf/releases
 - install `protoc-gen-go` and `protoc-gen-focus` :
-```
+
+```shell
 go install github.com/golang/protobuf/protoc-gen-go
 go install github.com/dinstone/focus-go/protoc-gen-focus
 ```
 
 ## Quick Start
+
 1. create a demo project and import the focus package:
+
 ```shell
 > go mod init demo
 > go get github.com/dinstone/focus-go
 ```
+
 2. under the path of the project, create a protobuf file `arith.proto`:
+
 ```protobuf
 syntax = "proto3";
 
@@ -45,13 +52,17 @@ message ArithResponse {
   int32 c = 1;
 }
 ```
+
 3. using `protoc` to generate code:
+
 ```shell
 > protoc --focus_out=. arith.proto --go_out=. arith.proto
 ```
+
 at this time, two files will be generated in the directory `protobuf`: `arith.pb.go` and `arith.svr.go`
 
 4. implement the ArithService in the file `arith.svr.go` :
+
 ```go
 package protobuf
 
@@ -87,8 +98,11 @@ func (this *ArithService) Div(args *ArithRequest, reply *ArithResponse) error {
 	return nil
 }
 ```
+
 ## Server
+
 under the path of the project, we create a file named `focus_server.go`, create a focus server and publish service.
+
 ```go
 package main
 
@@ -113,7 +127,9 @@ func main() {
 ```
 
 ## Client
+
 under the path of the project, we create a file named `focus_client.go`, create a focus client and call it synchronously with the `Add` function:
+
 ```go
 import (
 	"demo/protobuf"

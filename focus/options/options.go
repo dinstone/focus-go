@@ -1,8 +1,8 @@
 package options
 
 import (
-	"github.com/dinstone/focus-go/compressor"
-	"github.com/dinstone/focus-go/serializer"
+	"github.com/dinstone/focus-go/focus/compressor"
+	"github.com/dinstone/focus-go/focus/serializer"
 )
 
 type Options struct {
@@ -11,7 +11,7 @@ type Options struct {
 }
 
 type ServerOptions struct {
-	Options
+	Opts Options
 	Host string
 	Port int
 }

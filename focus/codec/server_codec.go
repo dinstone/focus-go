@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"github.com/dinstone/focus-go/protocol"
 	"io"
 	"net/rpc"
 	"sync"
 
-	"github.com/dinstone/focus-go/compressor"
-	"github.com/dinstone/focus-go/serializer"
+	"github.com/dinstone/focus-go/focus/protocol"
+
+	"github.com/dinstone/focus-go/focus/compressor"
+	"github.com/dinstone/focus-go/focus/serializer"
 )
 
 type reqCtx struct {

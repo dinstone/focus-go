@@ -1,15 +1,16 @@
 package client
 
 import (
-	"github.com/dinstone/focus-go"
-	"github.com/dinstone/focus-go/options"
-	"github.com/dinstone/focus-go/serializer"
-	pb "github.com/dinstone/focus-go/test/protobuf"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"net"
 	"reflect"
 	"testing"
+
+	"github.com/dinstone/focus-go/focus"
+	"github.com/dinstone/focus-go/focus/options"
+	"github.com/dinstone/focus-go/focus/serializer"
+	pb "github.com/dinstone/focus-go/test/protobuf"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFocusProtobuf(t *testing.T) {

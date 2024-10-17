@@ -2,15 +2,16 @@ package server
 
 import (
 	"fmt"
-	"github.com/dinstone/focus-go"
-	"github.com/dinstone/focus-go/options"
-	"github.com/dinstone/focus-go/serializer"
-	js "github.com/dinstone/focus-go/test/json"
-	pb "github.com/dinstone/focus-go/test/protobuf"
 	"log"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/dinstone/focus-go/focus"
+	"github.com/dinstone/focus-go/focus/options"
+	"github.com/dinstone/focus-go/focus/serializer"
+	js "github.com/dinstone/focus-go/test/json"
+	pb "github.com/dinstone/focus-go/test/protobuf"
 )
 
 func TestJsonServer(t *testing.T) {

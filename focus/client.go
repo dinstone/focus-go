@@ -1,13 +1,14 @@
 package focus
 
 import (
-	"github.com/dinstone/focus-go/compressor"
-	"github.com/dinstone/focus-go/options"
-	"github.com/dinstone/focus-go/serializer"
 	"io"
 	"net/rpc"
 
-	"github.com/dinstone/focus-go/codec"
+	"github.com/dinstone/focus-go/focus/compressor"
+	"github.com/dinstone/focus-go/focus/options"
+	"github.com/dinstone/focus-go/focus/serializer"
+
+	"github.com/dinstone/focus-go/focus/codec"
 )
 
 // Client rpc client based on net/rpc implementation
