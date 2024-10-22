@@ -3,14 +3,5 @@
     // 悬停以查看现有属性的描述。
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Attach Package",
-            "type": "go",
-            "request": "attach",
-            "mode": "remote",
-            "host": "127.0.0.1",
-            "port": 37293
-        }
-    ]
+    "configurations": []
 }

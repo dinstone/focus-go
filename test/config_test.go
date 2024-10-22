@@ -13,7 +13,7 @@ func TestConfig(t *testing.T) {
 	config.ShowConfig()
 
 	config.SetCompressor(compressor.Gzip)
-	config.SetSerializer(serializer.Proto)
+	config.SetSerializer(serializer.Protobuf)
 	config.ShowConfig()
 
 	fmt.Println(config.serializer.Type())
@@ -28,12 +28,12 @@ func TestConfig(t *testing.T) {
 
 func update(c Config) {
 	c.compressor = compressor.Gzip
-	c.serializer = serializer.Proto
+	c.serializer = serializer.Protobuf
 }
 
 func handle(c *Config) {
 	c.compressor = compressor.Gzip
-	c.serializer = serializer.Proto
+	c.serializer = serializer.Protobuf
 }
 
 func show(c Config) {

@@ -1,8 +1,6 @@
 package client
 
 import (
-	"log"
-	"net"
 	"reflect"
 	"testing"
 
@@ -14,39 +12,33 @@ import (
 )
 
 func TestFocusProtobuf(t *testing.T) {
-	conn, err := net.Dial("tcp", ":3333")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-	client := focus.NewClient(conn)
+	x := options.NewClientOptions(":8010")
+	x.SetSerializer(serializer.Protobuf)
+	client := focus.NewClient(x)
 	defer client.Close()
 
 	expect := &pb.ArithResponse{C: 25}
-	serviceMenthod := "ArithService.Add"
+	service := "ArithService"
+	menthod := "Add"
 	arg := &pb.ArithRequest{A: 20, B: 5}
 	reply := &pb.ArithResponse{}
-	err = client.Call(serviceMenthod, arg, reply)
+	err := client.Call(service, menthod, arg, reply)
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, true, reflect.DeepEqual(expect.C, reply.C))
 }
 
 func TestFocusJson(t *testing.T) {
-	conn, err := net.Dial("tcp", ":3333")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-
-	client := focus.NewClient(conn, options.WithSerializer(serializer.Json))
+	x := options.NewClientOptions(":3344")
+	client := focus.NewClient(x)
 	defer client.Close()
 
 	expect := "hi dinstone, from go"
-	serviceMenthod := "com.dinstone.focus.example.DemoService.hello"
+	service := "com.dinstone.focus.example.DemoService"
+	menthod := "hello"
 	arg := "dinstone, from go"
 	var reply string
-	err = client.Call(serviceMenthod, arg, &reply)
+	err := client.Call(service, menthod, arg, &reply)
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, true, reflect.DeepEqual(expect, reply))

@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"log"
-	"net"
 	"testing"
 	"time"
 
@@ -15,32 +14,24 @@ import (
 )
 
 func TestJsonServer(t *testing.T) {
-	lis, err := net.Listen("tcp", ":9010")
+	server := focus.NewServer(options.NewServerOptions(":9010"))
+	err := server.Register(new(js.TestService))
 	if err != nil {
 		log.Fatal(err)
 	}
-	server := focus.NewServer(options.WithSerializer(serializer.Json))
-	err = server.Register(new(js.TestService))
-	if err != nil {
-		log.Fatal(err)
-	}
-	go server.Serve(lis)
-
-	fmt.Println("service is on 9010")
+	go server.Start()
 	time.Sleep(time.Duration(2) * time.Hour)
 }
 
 func TestProtoServer(t *testing.T) {
-	lis, err := net.Listen("tcp", ":8010")
+	x := options.NewServerOptions(":8010")
+	x.SetSerializer(serializer.Protobuf)
+	server := focus.NewServer(x)
+	err := server.Register(new(pb.ArithService))
 	if err != nil {
 		log.Fatal(err)
 	}
-	server := focus.NewServer(options.WithSerializer(serializer.Proto))
-	err = server.Register(new(pb.ArithService))
-	if err != nil {
-		log.Fatal(err)
-	}
-	go server.Serve(lis)
+	go server.Start()
 
 	fmt.Println("service is on 8010")
 	time.Sleep(time.Duration(2) * time.Hour)

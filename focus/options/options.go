@@ -6,30 +6,48 @@ import (
 )
 
 type Options struct {
-	Compressor compressor.Compressor
-	Serializer serializer.Serializer
+	compressor compressor.Compressor
+	serializer serializer.Serializer
+}
+
+func (o *Options) SetCompressor(c compressor.Compressor) *Options {
+	o.compressor = c
+	return o
+}
+
+func (o *Options) GetCompressor() compressor.Compressor {
+	return o.compressor
+}
+
+func (o *Options) SetSerializer(s serializer.Serializer) *Options {
+	o.serializer = s
+	return o
+}
+
+func (o *Options) GetSerializer() serializer.Serializer {
+	return o.serializer
+}
+
+type ClientOptions struct {
+	Options
+	Address string
 }
 
 type ServerOptions struct {
-	Opts Options
-	Host string
-	Port int
+	Options
+	Address string
 }
 
-type Option func(o *Options)
-
-// WithCompressor set client compression format
-func WithCompressor(c compressor.Compressor) Option {
-	return func(o *Options) {
-		if c != nil {
-			o.Compressor = c
-		}
-	}
+func NewServerOptions(address string) ServerOptions {
+	base := Options{}
+	base.SetCompressor(compressor.Raw)
+	base.SetSerializer(serializer.Json)
+	return ServerOptions{Options: base, Address: address}
 }
 
-// WithSerializer set client serializer
-func WithSerializer(serializer serializer.Serializer) Option {
-	return func(o *Options) {
-		o.Serializer = serializer
-	}
+func NewClientOptions(address string) ClientOptions {
+	base := Options{}
+	base.SetCompressor(compressor.Raw)
+	base.SetSerializer(serializer.Json)
+	return ClientOptions{Options: base, Address: address}
 }

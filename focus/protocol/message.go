@@ -1,24 +1,29 @@
 package protocol
 
-import (
-	"sync"
-)
-
 // Focus protocol structure looks like:
 // 0  Version     Type        Reserved Flag   32
 // |----------|----------|----------/----------|
-//                  Message ID
+//
+//	Exchange Sequence
+//
 // |----------|----------|----------|----------|
-//                  Header Length
+//
+//	Header Length
+//
 // |----------|----------|----------|----------|
-//                  Header Content
+//
+//	Header Content
+//
 // |----------/----------/----------/----------|
-//                  Body Length
+//
+//	Body Length
+//
 // |----------|----------|----------|----------|
-//                  Body Content
+//
+//	Body Content
+//
 // |----------/----------/----------/----------|
 type Message struct {
-	sync.RWMutex
 	Version int8
 	MsgType int8
 	Flag    int16

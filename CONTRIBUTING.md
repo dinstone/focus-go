@@ -18,6 +18,7 @@ First of all, thanks for your contribution. you can participate this project in 
 ## Attention
 
 Your code should comply with the following principles：
+
 * All code should test in your local environment, try to avoid bugs.
 * All public methods should have the corresponding test method.
 * All code should have gone through `go fmt`

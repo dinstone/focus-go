@@ -9,7 +9,7 @@ import (
 // NotImplementProtoMessageError refers to param not implemented by proto.Message
 var NotImplementProtoMessageError = errors.New("param does not implement proto.Message")
 
-var Proto = ProtoSerializer{}
+var Protobuf = ProtoSerializer{}
 
 // ProtoSerializer implements the Serializer interface
 type ProtoSerializer struct {
