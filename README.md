@@ -111,18 +111,21 @@ import (
 	"log"
 	"net"
 
-	"github.com/dinstone/focus-go"
+	"github.com/dinstone/focus-go/focus"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":8082")
+	// server
+	x := options.NewServerOptions(":8082")
+	x.SetSerializer(serializer.Protobuf)
+	server := focus.NewServer(x)
+	// register service
+	err := server.RegisterName("ArithService", new(protobuf.ArithService))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	server := focus.NewServer()
-	server.RegisterName("ArithService", new(protobuf.ArithService))
-	server.Serve(lis)
+	
+	server.Start()
 }
 ```
 
@@ -133,46 +136,54 @@ under the path of the project, we create a file named `focus_client.go`, create 
 ```go
 import (
 	"demo/protobuf"
-	"github.com/dinstone/focus-go"
+	"github.com/dinstone/focus-go/focus"
 ...
+	// client
+	x := options.NewClientOptions(":8082")
+	x.SetSerializer(serializer.Protobuf)
+	client := focus.NewClient(x)
+	defer client.Close()
 
-conn, err := net.Dial("tcp", ":8082")
-if err != nil {
-	log.Fatal(err)
-}
-defer conn.Close()
-client := focus.NewClient(conn)
-resq := protobuf.ArithRequest{A: 20, B: 5}
-resp := protobuf.ArithResponse{}
-err = client.Call("ArithService.Add", &resq, &resp)
-log.Printf("Arith.Add(%v, %v): %v ,Error: %v", resq.A, resq.B, resp.C, err)
+	resq := protobuf.ArithRequest{A: 20, B: 5}
+	resp := protobuf.ArithResponse{}
+	err = client.Call("ArithService", "Add", &resq, &resp)
+	log.Printf("Arith.Add(%v, %v): %v ,Error: %v", resq.A, resq.B, resp.C, err)
 ```
-you can also call asynchronously, which will return a channel of type *rpc.Call:
+
+you can also call asynchronously, which will return a channel of type *focus.Call:
+
 ```go
-
-result := client.AsyncCall("ArithService.Add", &resq, &resp)
-select {
-case call := <-result:
-	log.Printf("Arith.Add(%v, %v): %v ,Error: %v", resq.A, resq.B, resp.C, call.Error)
-case <-time.After(100 * time.Microsecond):
-	log.Fatal("time out")
-}
+	result := client.AsyncCall("ArithService", "Add", &resq, &resp)
+	select {
+	case call := <-result:
+		log.Printf("Arith.Add(%v, %v): %v ,Error: %v", resq.A, resq.B, resp.C, call.Error)
+	case <-time.After(100 * time.Microsecond):
+		log.Fatal("time out")
+	}
 ```
+
 of course, you can also compress with three supported formats `gzip`, `snappy`, `zlib`:
+
 ```go
 import (
-    "github.com/dinstone/focus-go"
-    "github.com/dinstone/focus-go/options"
-    "github.com/dinstone/focus-go/serializer"
-	"github.com/dinstone/focus-go/compressor"
+    "github.com/dinstone/focus-go/focus"
+    "github.com/dinstone/focus-go/focus/options"
+    "github.com/dinstone/focus-go/focus/serializer"
+	"github.com/dinstone/focus-go/focus/compressor"
 )
 
 ...
-client := focus.NewClient(conn, options.WithCompress(compressor.Gzip))
 
+x := options.NewServerOptions(":8008")
+x.SetCompressor(compressor.Gzip)
+x.SetSerializer(serializer.Protobuf)
+client := focus.NewClient(x)
 ```
+
 ## Custom Serializer
+
 If you want to customize the serializer, you must implement the `Serializer` interface:
+
 ```go
 type Serializer interface {
     Marshal(message interface{}) ([]byte, error)
@@ -180,7 +191,9 @@ type Serializer interface {
     Type() string
 }
 ```
+
 `JsonSerializer` is a serializer based Json:
+
 ```go
 type JsonSerializer struct{}
 
@@ -210,21 +223,20 @@ func (_ *HelloService) SayHello(args *HelloRequest, reply *HelloResponce) error 
 }
 
 ```
+
 finally, we need to set the serializer on the focus server:
+
 ```go
 func main() {
-	lis, err := net.Listen("tcp", ":8082")
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	server := focus.NewServer(options.WithSerializer(serializer.Json))
+	x := options.NewServerOptions(":8008")
+	x.SetSerializer(serializer.Json)
+	server := focus.NewServer(x)
+
 	server.Register(new(HelloService))
-	server.Serve(lis)
+
+	server.Start()
 }
 ```
 
-Remember that when the focus client calls the service, it also needs to set the serializer:
-```go
-focus.NewClient(conn, options.WithSerializer(serializer.Json))
-```
+Remember that when the focus client calls the service, it also needs to set the serializer.
