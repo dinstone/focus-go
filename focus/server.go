@@ -8,8 +8,10 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/dinstone/focus-go/focus/compressor"
 	"github.com/dinstone/focus-go/focus/options"
 	"github.com/dinstone/focus-go/focus/protocol"
+	"github.com/dinstone/focus-go/focus/serializer"
 	"github.com/dinstone/focus-go/focus/transport"
 )
 
@@ -206,7 +208,7 @@ func (s *Server) process(conn *transport.Connection) {
 
 		// heartbeat message
 		if request.MsgType == 0 {
-			request.Flag += 1
+			request.Status = 1
 			conn.WriteMessage(request)
 
 			continue
@@ -217,82 +219,33 @@ func (s *Server) process(conn *transport.Connection) {
 			continue
 		}
 
-		serviceName := request.Headers["call.service"]
-		methodName := request.Headers["call.method"]
-
-		var status StatusType
-
 		// Look up the svciv and call method.
-		svciv, ok := s.serviceMap.Load(serviceName)
-		if !ok {
-			status = StatusType{202, "rpc: can't find service " + serviceName}
-		}
-		stype := svciv.(*serviceType)
-		mtype := stype.method[methodName]
-		if mtype == nil {
-			status = StatusType{203, "rpc: can't find method " + methodName}
-		}
-
 		// Decode the argument value.
-		var argref reflect.Value
-		argIsValue := false // if true, need to indirect before calling.
-		if mtype.ArgType.Kind() == reflect.Pointer {
-			argref = reflect.New(mtype.ArgType.Elem())
-		} else {
-			argref = reflect.New(mtype.ArgType)
-			argIsValue = true
-		}
-
+		// if true, need to indirect before calling.
 		// argv guaranteed to be a pointer now.
+		// Invoke the method, providing a new value for the reply.
+		// The return value for the method is an error.
 		compressor := s.options.GetCompressor()
 		serializer := s.options.GetSerializer()
 
-		content, err := compressor.Decode(request.Content)
-		if err != nil {
-			status = StatusType{201, err.Error()}
-		}
-		err = serializer.Decode(content, argref.Interface())
-		if err != nil {
-			status = StatusType{201, err.Error()}
-		}
-		if argIsValue {
-			argref = argref.Elem()
-		}
-
-		replyv := reflect.New(mtype.ReplyType.Elem())
-		switch mtype.ReplyType.Elem().Kind() {
-		case reflect.Map:
-			replyv.Elem().Set(reflect.MakeMap(mtype.ReplyType.Elem()))
-		case reflect.Slice:
-			replyv.Elem().Set(reflect.MakeSlice(mtype.ReplyType.Elem(), 0, 0))
-		}
-
-		function := mtype.method.Func
-		// Invoke the method, providing a new value for the reply.
-		returnValues := function.Call([]reflect.Value{stype.rcvr, argref, replyv})
-		// The return value for the method is an error.
-		errInter := returnValues[0].Interface()
-		if errInter != nil {
-			status = StatusType{301, errInter.(error).Error()}
-		}
+		replyv, status := s.newMethod(request, compressor, serializer)
 
 		respone := new(protocol.Message)
 		respone.Version = request.Version
-		respone.MsgId = request.MsgId
+		respone.Sequence = request.Sequence
 		respone.MsgType = 2
 
 		respone.Headers = make(protocol.Headers, 2)
-		// respone.Headers["compressor.type"] = compressor.Type()
 
 		if status.Code != 0 {
-			respone.Flag = int16(status.Code)
+			respone.Status = int16(status.Code)
 			respone.Content = []byte(status.Message)
 		} else {
-			respone.Flag = 0
+			respone.Status = 0
 			respone.Headers["serializer.type"] = serializer.Type()
 			respBody, err := serializer.Encode(replyv.Interface())
 			if err != nil {
-				respone.Flag = 201
+				respone.Status = 201
 				respone.Content = []byte("encode reply error:" + err.Error())
 			} else {
 				respone.Content, _ = compressor.Encode(respBody)
@@ -303,6 +256,65 @@ func (s *Server) process(conn *transport.Connection) {
 	}
 
 	conn.Close()
+}
+
+func (s *Server) newMethod(request *protocol.Message, compressor compressor.Compressor, serializer serializer.Serializer) (*reflect.Value, StatusType) {
+	var status StatusType
+
+	serviceName := request.Headers["call.service"]
+	methodName := request.Headers["call.method"]
+	svciv, ok := s.serviceMap.Load(serviceName)
+	if !ok {
+		status = StatusType{202, "rpc: can't find service " + serviceName}
+		return nil, status
+	}
+	stype := svciv.(*serviceType)
+	mtype := stype.method[methodName]
+	if mtype == nil {
+		status = StatusType{203, "rpc: can't find method " + methodName}
+		return nil, status
+	}
+
+	var argref reflect.Value
+	argIsValue := false
+	if mtype.ArgType.Kind() == reflect.Pointer {
+		argref = reflect.New(mtype.ArgType.Elem())
+	} else {
+		argref = reflect.New(mtype.ArgType)
+		argIsValue = true
+	}
+
+	// decode arg
+	content, err := compressor.Decode(request.Content)
+	if err != nil {
+		status = StatusType{201, err.Error()}
+	}
+	err = serializer.Decode(content, argref.Interface())
+	if err != nil {
+		status = StatusType{201, err.Error()}
+	}
+	if argIsValue {
+		argref = argref.Elem()
+	}
+
+	replyv := reflect.New(mtype.ReplyType.Elem())
+	switch mtype.ReplyType.Elem().Kind() {
+	case reflect.Map:
+		replyv.Elem().Set(reflect.MakeMap(mtype.ReplyType.Elem()))
+	case reflect.Slice:
+		replyv.Elem().Set(reflect.MakeSlice(mtype.ReplyType.Elem(), 0, 0))
+	}
+
+	function := mtype.method.Func
+	// invoke
+	returnValues := function.Call([]reflect.Value{stype.rcvr, argref, replyv})
+	// return value process
+	errInter := returnValues[0].Interface()
+	if errInter != nil {
+		status = StatusType{301, errInter.(error).Error()}
+		return nil, status
+	}
+	return &replyv, status
 }
 
 func (s *Server) Close() {

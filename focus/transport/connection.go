@@ -30,13 +30,13 @@ func (c *Connection) ReadMessage() (*protocol.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	var flag int16
-	err = binary.Read(c.reader, binary.BigEndian, &flag)
+	var status int16
+	err = binary.Read(c.reader, binary.BigEndian, &status)
 	if err != nil {
 		return nil, err
 	}
-	var msgId int32
-	err = binary.Read(c.reader, binary.BigEndian, &msgId)
+	var sequence int32
+	err = binary.Read(c.reader, binary.BigEndian, &sequence)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +70,8 @@ func (c *Connection) ReadMessage() (*protocol.Message, error) {
 	message := new(protocol.Message)
 	message.Version = version
 	message.MsgType = msgType
-	message.Flag = flag
-	message.MsgId = msgId
+	message.Status = status
+	message.Sequence = sequence
 	message.Headers = headers
 	message.Content = content
 
@@ -85,9 +85,9 @@ func (c *Connection) WriteMessage(message *protocol.Message) error {
 	//  type
 	binary.Write(c.writer, binary.BigEndian, message.MsgType)
 	//  status
-	binary.Write(c.writer, binary.BigEndian, message.Flag)
+	binary.Write(c.writer, binary.BigEndian, message.Status)
 	//  Sequence
-	binary.Write(c.writer, binary.BigEndian, message.MsgId)
+	binary.Write(c.writer, binary.BigEndian, message.Sequence)
 
 	// headers length
 	hdata := message.Headers.Marshal()

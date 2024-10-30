@@ -24,10 +24,10 @@ package protocol
 //
 // |----------/----------/----------/----------|
 type Message struct {
-	Version int8
-	MsgType int8
-	Flag    int16
-	MsgId   int32
-	Headers Headers
-	Content []byte
+	Version  int8
+	MsgType  int8
+	Status   int16
+	Sequence int32
+	Headers  Headers
+	Content  []byte
 }

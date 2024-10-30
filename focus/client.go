@@ -53,19 +53,19 @@ func (client *Client) input() {
 			continue
 		}
 		// call's response message
-		seq := response.MsgId
+		seq := response.Sequence
 		client.mutex.Lock()
 		call := client.pending[seq]
 		delete(client.pending, seq)
 		client.mutex.Unlock()
 
 		if call != nil {
-			if response.Flag == 0 {
+			if response.Status == 0 {
 				response.Content, _ = client.options.GetCompressor().Decode(response.Content)
 				client.options.GetSerializer().Decode(response.Content, call.Reply)
 			} else {
 				errmsg := string(response.Content)
-				call.Error = fmt.Errorf("(%d)%s", response.Flag, errmsg)
+				call.Error = fmt.Errorf("(%d)%s", response.Status, errmsg)
 			}
 			call.done()
 		}
@@ -161,7 +161,7 @@ func (client *Client) send(call *Call) {
 	request := new(protocol.Message)
 	request.Version = 1
 	request.MsgType = 1
-	request.MsgId = seq
+	request.Sequence = seq
 
 	serializer := client.options.GetSerializer()
 	content, err := serializer.Encode(call.Args)
