@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
-func main0() {
+func main() {
 	g := rpc{}
 	protogen.Options{}.Run(g.Generate)
 }

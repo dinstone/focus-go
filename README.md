@@ -21,6 +21,8 @@ go install github.com/dinstone/focus-go/protoc-gen-focus
 ```shell
 > go mod init demo
 > go get github.com/dinstone/focus-go
+> go get github.com/golang/protobuf/protoc-gen-go
+> go get github.com/dinstone/focus-go/protoc-gen-focus
 ```
 
 2. under the path of the project, create a protobuf file `arith.proto`:

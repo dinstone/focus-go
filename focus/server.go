@@ -228,7 +228,7 @@ func (s *Server) process(conn *transport.Connection) {
 		compressor := s.options.GetCompressor()
 		serializer := s.options.GetSerializer()
 
-		replyv, status := s.newMethod(request, compressor, serializer)
+		replyv, status := s.invoke(request, compressor, serializer)
 
 		respone := new(protocol.Message)
 		respone.Version = request.Version
@@ -258,7 +258,7 @@ func (s *Server) process(conn *transport.Connection) {
 	conn.Close()
 }
 
-func (s *Server) newMethod(request *protocol.Message, compressor compressor.Compressor, serializer serializer.Serializer) (*reflect.Value, StatusType) {
+func (s *Server) invoke(request *protocol.Message, compressor compressor.Compressor, serializer serializer.Serializer) (*reflect.Value, StatusType) {
 	var status StatusType
 
 	serviceName := request.Headers["call.service"]
