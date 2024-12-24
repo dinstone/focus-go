@@ -1,8 +1,17 @@
-# Focus-go
+# Overview
 
-**Focus** is the next generation cross language lightweight RPC framework. It can quickly and easily develop microservice applications, which greatly simplifies RPC programming.
+**Focus RPC** is the next generation cross language lightweight RPC framework. It can quickly and easily develop microservice applications, which greatly simplifies RPC programming.
 
-**Focus-go** is the go language implementation of the Focus.
+**Focus RPC** 是下一代跨平台、跨语言的轻量级RPC框架。旨在帮助开发者可以更加高效地构建和维护微服务应用程序。他们可以利用统一的接口和协议，在不同的平台和语言之间进行通信和协作，从而提高开发效率和系统可靠性，简化多平台下的RPC编程，可以很轻松地实现云端编程和移动端编程。
+
+- [focus-go](https://github.com/focus-rpc/focus-go) is the go language implementation of the Focus.
+- [focus-java](https://github.com/focus-rpc/focus-java) is the java language implementation of the Focus.
+
+---
+
+# Focus Go Implementation
+
+**focus-go** is the go language implementation of the Focus.
 
 ## Install
 
